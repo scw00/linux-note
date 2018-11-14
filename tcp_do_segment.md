@@ -46,11 +46,11 @@
  - 将snd_una 设置为包的ack
  - 重置snd_nxt 
 
-##### step 6
+#### step 6
  - 纠正snd_wnd，并且如果需要纠正的话讲needoutput 置为1
  - 不考虑urg
  
-##### dodata
+#### dodata
 
  - 不考虑TFO
  - 如果needoutput 被置位 或者TF_ACKNOW被置位则调用tfb_tcp_output(tcp_output)发送数据
