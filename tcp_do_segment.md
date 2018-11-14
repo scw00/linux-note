@@ -1,4 +1,4 @@
-# 如果为syn_sent阶段
+## 如果为syn_sent阶段
 
  - 如果包含syn && fin 根据是否drop_synfin配置判断是否抛弃
  - 如果包含 ack 则 ack < iss || ac > send_max的话，回复rst 并抛弃 （不会放弃链接）
@@ -32,3 +32,29 @@
  - 如果数据包含ack(syn && ack)，这里很可能我们已经发送了数据(TFO?)
    - 进入普通处理ack逻辑 process_ACK
  - 否则进入 step 6 （fuking stepxxxx)
+
+#### 普通处理ack逻辑 process_ACK
+
+ - 计算真实被acked 字节数 acked
+ - 如果我们有一次重传并且ack 到来的时间 < RTT /2， 认为是伪重传，提示congestion 。
+ - 重新估算rtt
+ - 如果 包ack == snd_max取消重传定时器，否则启用重传定时器
+ - 如果acked数据为0 则（如果从syn_sent阶段流转过来 则直接进入step6）
+ - 提示congestion 收到数据（此时包含数据）
+ - 释放对应的acked 字节空间
+ - 纠正snd_una 如果snd_una 回环的话， 并判断是否可以退出recovery 状态
+ - 将snd_una 设置为包的ack
+ - 重置snd_nxt 
+
+##### step 6
+ - 纠正snd_wnd，并且如果需要纠正的话讲needoutput 置为1
+ - 不考虑urg
+ 
+##### dodata
+
+ - 不考虑TFO
+ - 如果needoutput 被置位 或者TF_ACKNOW被置位则调用tfb_tcp_output(tcp_output)发送数据
+ 
+ 
+ 
+ 
