@@ -52,6 +52,4 @@
  - 不考虑TFO
  - 如果needoutput 被置位 或者TF_ACKNOW被置位则调用tfb_tcp_output(tcp_output)发送数据
  
- ### 总结
-  在syn_sent阶段， 如果收到seg 包含ack则判断ack是否有效，如果无效则抛弃。如果只有rst 则直接抛弃并返回，如果有rst + ack 且ack 有效则抛弃链接。到了这里只会有syn 或者syn+ack。如果是syn 则为同时创建请求
 
