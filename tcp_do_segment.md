@@ -1,0 +1,34 @@
+# 如果为syn_sent阶段
+
+ - 如果包含syn && fin 根据是否drop_synfin配置判断是否抛弃
+ - 如果包含 ack 则 ack < iss || ac > send_max的话，回复rst 并抛弃 （不会放弃链接）
+ - 设置rcv_time 
+ - 根据包的win 设置twin局部变量
+ - （跳过ecn）
+ - （不对option做解析）
+ - （不开启ts）
+ - 如果包换syn 则初始化send_win
+ - 初始化recv_wim
+ - 如果包含rst 和ack 两个标记 (ack的合法性已经在之前验过了)，则直接断开连接。
+ - 如果包含rst 则抛弃（没有ack的话 并不会断开链接）
+ - 如果没有syn， 抛弃
+ - 初始化irs 为包的th_seq (到了这里数据报必然会有syn 标记，可能会有 ack 标记，fin标记必然为0)
+ - (tp)->rcv_adv = (tp)->rcv_nxt = (tp)->irs + 1
+ - 如果包含ack 则为单方向链接，如果包含rcv_scale 则重新初始化rcv_win
+   - snd_una ++ 来响应对端ack
+   - 不考虑delay ack
+   - 不考虑ece
+   - 初始化t_starttime 为当前时间
+   - 如果t_flags 包含TF_NEEDFIN 表示用户已经关闭了该链接 则直接进入TCPS_FIN_WAIT_1阶段
+   - 否则进入 TCPS_ESTABLISHED 阶段同时初始化congestion control， 并激活keepalive 定时器
+ - 否则双端同时打开连接
+   - 将t_flags 标记为(TF_ACKNOW | TF_NEEDSYN)
+   - 禁用重传定时器
+   - 进入TCPS_SYN_RECEIVED阶段
+ - 将包的seq +1 用来指定正确的数据seq
+ - 如果包的数据 size > rcv_win 则抛弃不被接受的部分， 并将fin强制标记为0
+ - 设置跟新该snd_win 的包的序号为 snd_wl1 = seq -1
+ - 将紧急数据的序号标记为 rcv_up = seq
+ - 如果数据包含ack(syn && ack)，这里很可能我们已经发送了数据(TFO?)
+   - 进入普通处理ack逻辑 process_ACK
+ - 否则进入 step 6 （fuking stepxxxx)
