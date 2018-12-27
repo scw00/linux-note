@@ -7,8 +7,10 @@ See these define
 #define	NUPDE		(NUPDPE*NPDEPG)	/* number of userland PD entries */
 ```
 
-`pindex` is an index of a virtual page which inserted in vm system. It has 3 levels (PDE, PDP, PML4). So we make the rule: For LV.1 entries , the pindex should be the global index of the PDE.
-For Lv.2 the pindex should be global index of the PDPE plus NUPDE. The last level should be index of the global PML4E plus NUPDPE plus NUPDE.
+`pindex` is an index of a virtual page which inserted in vm system. It has 3 levels (PDE, PDP, PML4). So we make the rule: 
+ - For LV.1 entries , the pindex should be the global index of the PDE.
+ - For Lv.2 the pindex should be global index of the PDPE plus NUPDE. 
+ - The last level should be index of the global PML4E plus NUPDPE plus NUPDE.
 
 ## How to calculate the index of PTE
 
